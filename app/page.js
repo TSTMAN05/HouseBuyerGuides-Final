@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getStates, getSearchCities } from "@/lib/airtable";
+import { getStates, getSearchCities } from "@/lib/supabase-queries";
 import HeroSearch from "@/components/HeroSearch";
 import DidYouKnow from "@/components/DidYouKnow";
 

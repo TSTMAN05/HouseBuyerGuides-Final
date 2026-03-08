@@ -1,10 +1,20 @@
 import Link from "next/link";
-import { formatCurrency } from "@/lib/utils";
+
+/** Left border color (hex) for compact variant by assistance type. */
+function getBorderColor(type) {
+  if (!type) return "#9ca3af";
+  const t = String(type).toLowerCase();
+  if (t.includes("grant")) return "#22c55e";
+  if (t.includes("forgivable")) return "#3b82f6";
+  if (t.includes("deferred")) return "#f59e0b";
+  if (t.includes("repayable")) return "#9ca3af";
+  return "#9ca3af";
+}
 
 /**
- * Compact program card for city pages: name, org, amount, type, link to program page
+ * Program card: featured (top programs — equal height, hover) or compact (list — left border, horizontal layout).
  */
-export default function ProgramCard({ program, showLink = true }) {
+export default function ProgramCard({ program, variant = "featured", showLink = true }) {
   const slug = program?.Slug;
   const name = program?.["Program Name"];
   const org = program?.["Administering Organization"];
@@ -12,14 +22,55 @@ export default function ProgramCard({ program, showLink = true }) {
   const type = program?.["Assistance Type"];
   const fundingStatus = program?.["Funding Status"];
 
+  if (variant === "compact") {
+    const borderColor = getBorderColor(type);
+    return (
+      <div
+        className="flex flex-wrap items-center justify-between gap-3 border border-gray-200 border-l-4 rounded bg-white px-3 py-2.5"
+        style={{ borderLeftColor: borderColor }}
+      >
+        <div className="min-w-0 flex-1">
+          {showLink && slug ? (
+            <Link
+              href={`/programs/${slug}`}
+              className="font-medium text-gray-900 hover:text-blue-600 hover:underline"
+            >
+              {name}
+            </Link>
+          ) : (
+            <span className="font-medium text-gray-900">{name}</span>
+          )}
+          {org && (
+            <p className="text-sm text-gray-600 truncate">{org}</p>
+          )}
+        </div>
+        <div className="flex shrink-0 flex-wrap items-baseline justify-end gap-x-3 gap-y-0 text-sm text-gray-700">
+          {amount && <span className="font-medium">{amount}</span>}
+          {type && <span>{type}</span>}
+          {fundingStatus && fundingStatus !== "Open" && (
+            <span className="text-amber-700">{fundingStatus}</span>
+          )}
+          {showLink && slug && (
+            <Link
+              href={`/programs/${slug}`}
+              className="text-blue-600 hover:underline"
+            >
+              Details
+            </Link>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="border border-gray-200 rounded-lg p-4 bg-white">
-      <div className="flex flex-wrap items-start justify-between gap-2">
+    <div className="flex h-full flex-col rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md">
+      <div className="flex flex-1 flex-col gap-2">
         <div>
           {showLink && slug ? (
             <Link
               href={`/programs/${slug}`}
-              className="font-semibold text-gray-900 hover:text-blue-700 hover:underline"
+              className="font-semibold text-gray-900 hover:text-blue-600 hover:underline"
             >
               {name}
             </Link>
@@ -30,7 +81,7 @@ export default function ProgramCard({ program, showLink = true }) {
             <p className="text-sm text-gray-600 mt-0.5">{org}</p>
           )}
         </div>
-        <div className="text-right text-sm">
+        <div className="mt-auto text-sm">
           {amount && (
             <span className="font-medium text-gray-900">{amount}</span>
           )}
@@ -47,7 +98,7 @@ export default function ProgramCard({ program, showLink = true }) {
       {showLink && slug && (
         <Link
           href={`/programs/${slug}`}
-          className="inline-block mt-3 text-sm font-medium text-blue-600 hover:text-blue-800"
+          className="mt-3 text-sm font-medium text-blue-600 hover:text-blue-800"
         >
           Full details →
         </Link>

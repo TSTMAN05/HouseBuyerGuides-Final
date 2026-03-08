@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getProgramBySlug, getAllProgramSlugs } from "@/lib/airtable";
+import { getProgramBySlug, getAllProgramSlugs } from "@/lib/supabase-queries";
 import { formatCurrency, formatDate, withCurrentGuideYear } from "@/lib/utils";
 import { buildMetadata } from "@/lib/seo";
 import Breadcrumbs from "@/components/Breadcrumbs";

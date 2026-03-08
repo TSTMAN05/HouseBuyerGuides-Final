@@ -5,9 +5,9 @@ export default function Footer() {
   const year = new Date().getFullYear();
   return (
     <footer className="border-t border-gray-200 bg-gray-50 mt-auto">
-      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
+      <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6">
         <Disclaimer />
-        <div className="mt-6 flex flex-wrap gap-6 text-sm text-gray-600">
+        <div className="mt-4 flex flex-wrap gap-5 text-sm text-gray-600">
           <Link href="/" className="hover:text-gray-900">
             Home
           </Link>
@@ -30,7 +30,7 @@ export default function Footer() {
             About
           </Link>
         </div>
-        <p className="mt-6 text-sm text-gray-500">
+        <p className="mt-4 text-sm text-gray-500">
           © {year} HouseBuyerGuides.com. For educational purposes only. Not
           financial advice.
         </p>

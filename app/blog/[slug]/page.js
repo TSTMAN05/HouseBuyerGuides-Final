@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
-import { getBlogPostBySlug, getBlogPosts } from "@/lib/airtable";
+import { getBlogPostBySlug, getBlogPosts } from "@/lib/supabase-queries";
 import { buildMetadata } from "@/lib/seo";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import LastUpdated from "@/components/LastUpdated";

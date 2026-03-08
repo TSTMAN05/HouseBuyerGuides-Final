@@ -13,16 +13,16 @@ export default function CityCard({ city, stateSlug }) {
   return (
     <Link
       href={href}
-      className="block border border-gray-200 rounded-lg p-4 bg-white hover:border-gray-300 hover:shadow-sm transition"
+      className="flex h-full flex-col border border-gray-200 rounded-lg p-4 bg-white hover:border-gray-300 hover:shadow-sm transition"
     >
       <h3 className="font-semibold text-gray-900">{name}</h3>
       {county && (
         <p className="text-sm text-gray-600 mt-0.5">{county}</p>
       )}
       {oneLiner && (
-        <p className="text-sm text-gray-600 mt-2 line-clamp-2">{oneLiner}</p>
+        <p className="text-sm text-gray-600 mt-2 line-clamp-2 flex-1">{oneLiner}</p>
       )}
-      <span className="inline-block mt-2 text-sm font-medium text-blue-600">
+      <span className="inline-block mt-auto pt-2 text-sm font-medium text-blue-600">
         View programs →
       </span>
     </Link>

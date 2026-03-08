@@ -1,4 +1,4 @@
-import { getBlogPosts } from "@/lib/airtable";
+import { getBlogPosts } from "@/lib/supabase-queries";
 import { buildMetadata } from "@/lib/seo";
 import BlogCard from "@/components/BlogCard";
 

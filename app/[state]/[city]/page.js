@@ -6,7 +6,7 @@ import {
   getCitiesByStateSlug,
   getProgramsByCity,
   getPublishedCityParams,
-} from "@/lib/airtable";
+} from "@/lib/supabase-queries";
 import {
   groupProgramsByLevel,
   getTopProgramsByAssistance,
@@ -22,7 +22,6 @@ import ProgramTable from "@/components/ProgramTable";
 import HowToApply from "@/components/HowToApply";
 import FAQSection from "@/components/FAQSection";
 import LastUpdated from "@/components/LastUpdated";
-import Disclaimer from "@/components/Disclaimer";
 import CityCard from "@/components/CityCard";
 
 export const revalidate = 86400;
@@ -49,15 +48,22 @@ export async function generateMetadata({ params }) {
 }
 
 function parseFAQContent(content) {
-  if (!content?.trim()) return [];
-  try {
-    const parsed = JSON.parse(content);
-    return Array.isArray(parsed)
-      ? parsed.filter((q) => q?.question && q?.answer)
-      : [];
-  } catch {
-    return [];
+  if (content == null) return [];
+  if (Array.isArray(content)) {
+    return content.filter((q) => q && (q.question != null) && (q.answer != null));
   }
+  if (typeof content === "string" && !content.trim()) return [];
+  if (typeof content === "string") {
+    try {
+      const parsed = JSON.parse(content);
+      return Array.isArray(parsed)
+        ? parsed.filter((q) => q?.question && q?.answer)
+        : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
 }
 
 export default async function CityPage({ params }) {
@@ -81,8 +87,11 @@ export default async function CityPage({ params }) {
   const faqList = parseFAQContent(city["FAQ Content"]);
   const faqSchema = buildFAQSchema(faqList);
 
+  const stateAbbr = state["State Abbreviation"] || "";
+  const year = new Date().getFullYear();
+
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
+    <div className="mx-auto max-w-5xl px-4 sm:px-6">
       <Breadcrumbs
         items={[
           { label: "Home", href: "/" },
@@ -91,86 +100,85 @@ export default async function CityPage({ params }) {
         ]}
       />
 
-      <h1 className="text-3xl font-bold text-gray-900 mt-2">
-        {getCityPageTitle(cityName, state["State Abbreviation"])}
-      </h1>
+      <header className="py-12 md:py-16">
+        <h1 className="text-4xl font-bold tracking-tight text-gray-900 md:text-5xl">
+          First-Time Homebuyer Programs in{" "}
+          <span className="text-blue-600">{cityName}</span>, {stateAbbr} ({year})
+        </h1>
+        {intro && (
+          <div className="mt-6 max-w-2xl text-gray-700 leading-relaxed">
+            {intro}
+          </div>
+        )}
+      </header>
 
-      {intro && (
-        <div className="mt-6 prose prose-gray max-w-none text-gray-700">
-          {intro}
-        </div>
-      )}
-
-      <div className="mt-8">
+      <div className="flex flex-col gap-12 pb-16">
         <HousingSnapshot city={city} />
-      </div>
 
-      {topPrograms.length > 0 && (
-        <section className="mt-12" aria-labelledby="top-programs-heading">
+        {topPrograms.length > 0 && (
+          <section aria-labelledby="top-programs-heading">
+            <h2
+              id="top-programs-heading"
+              className="text-xl font-semibold text-gray-900 mb-2"
+            >
+              Top Homebuyer Programs in {cityName}
+            </h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Programs with the highest assistance amounts available in this area.
+            </p>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {topPrograms.map((p) => (
+                <ProgramCard key={p.id} program={p} variant="featured" />
+              ))}
+            </div>
+          </section>
+        )}
+
+        <section aria-labelledby="all-programs-heading">
           <h2
-            id="top-programs-heading"
+            id="all-programs-heading"
             className="text-xl font-semibold text-gray-900 mb-4"
           >
-            Top Homebuyer Programs in {cityName}
+            All programs by level
           </h2>
-          <p className="text-sm text-gray-600 mb-4">
-            Programs with the highest assistance amounts available in this area.
-          </p>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {topPrograms.map((p) => (
-              <ProgramCard key={p.id} program={p} showLink={true} />
-            ))}
-          </div>
+          {PROGRAM_LEVEL_ORDER.map((level) => {
+            const progs = grouped[level];
+            if (!progs?.length) return null;
+            return (
+              <ProgramSection
+                key={level}
+                level={level}
+                programs={progs}
+                variant="compact"
+              />
+            );
+          })}
+          {Object.entries(grouped).map(([level]) => {
+            if (PROGRAM_LEVEL_ORDER.includes(level)) return null;
+            return (
+              <ProgramSection
+                key={level}
+                level={level}
+                programs={grouped[level]}
+                variant="compact"
+              />
+            );
+          })}
         </section>
-      )}
 
-      <section className="mt-12" aria-labelledby="all-programs-heading">
-        <h2
-          id="all-programs-heading"
-          className="text-xl font-semibold text-gray-900 mb-6"
-        >
-          All programs by level
-        </h2>
-        {PROGRAM_LEVEL_ORDER.map((level) => {
-          const progs = grouped[level];
-          if (!progs?.length) return null;
-          return (
-            <ProgramSection
-              key={level}
-              level={level}
-              programs={progs}
-            />
-          );
-        })}
-        {Object.entries(grouped).map(([level]) => {
-          if (PROGRAM_LEVEL_ORDER.includes(level)) return null;
-          return (
-            <ProgramSection
-              key={level}
-              level={level}
-              programs={grouped[level]}
-            />
-          );
-        })}
-      </section>
+        <section aria-labelledby="eligibility-heading">
+          <h2
+            id="eligibility-heading"
+            className="text-xl font-semibold text-gray-900 mb-4"
+          >
+            Eligibility at a glance
+          </h2>
+          <ProgramTable programs={programs} />
+        </section>
 
-      <section className="mt-12" aria-labelledby="eligibility-heading">
-        <h2
-          id="eligibility-heading"
-          className="text-xl font-semibold text-gray-900 mb-4"
-        >
-          Eligibility at a glance
-        </h2>
-        <ProgramTable programs={programs} />
-      </section>
-
-      <div className="mt-12">
         <HowToApply content={city["How to Apply Content"]} />
-      </div>
 
-      <div className="mt-12">
         <FAQSection faqList={faqList} />
-      </div>
       {faqSchema && (
         <Script
           id="faq-schema"
@@ -180,27 +188,23 @@ export default async function CityPage({ params }) {
         />
       )}
 
-      {nearbyCities.length > 0 && (
-        <section className="mt-12" aria-labelledby="nearby-cities-heading">
-          <h2
-            id="nearby-cities-heading"
-            className="text-xl font-semibold text-gray-900 mb-4"
-          >
-            Nearby cities with homebuyer programs
-          </h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {nearbyCities.map((c) => (
-              <CityCard key={c.id} city={c} stateSlug={stateSlug} />
-            ))}
-          </div>
-        </section>
-      )}
+        {nearbyCities.length > 0 && (
+          <section aria-labelledby="nearby-cities-heading">
+            <h2
+              id="nearby-cities-heading"
+              className="text-xl font-semibold text-gray-900 mb-4"
+            >
+              Nearby cities with homebuyer programs
+            </h2>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {nearbyCities.map((c) => (
+                <CityCard key={c.id} city={c} stateSlug={stateSlug} />
+              ))}
+            </div>
+          </section>
+        )}
 
-      <div className="mt-12">
         <LastUpdated date={city["Last Updated"]} />
-      </div>
-      <div className="mt-6">
-        <Disclaimer />
       </div>
     </div>
   );

@@ -4,7 +4,7 @@ import {
   getStateBySlug,
   getCitiesByStateSlug,
   getStateSlugs,
-} from "@/lib/airtable";
+} from "@/lib/supabase-queries";
 import { buildMetadata } from "@/lib/seo";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import CityCard from "@/components/CityCard";

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getAllPrograms } from "@/lib/airtable";
+import { getAllPrograms } from "@/lib/supabase-queries";
 import { buildMetadata } from "@/lib/seo";
 import ProgramCard from "@/components/ProgramCard";
 
