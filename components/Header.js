@@ -12,11 +12,8 @@ export default function Header() {
             HouseBuyerGuides.com
           </Link>
           <nav className="flex gap-6 text-sm font-medium text-gray-600">
-            <Link href="/north-carolina" className="hover:text-gray-900">
-              North Carolina
-            </Link>
-            <Link href="/south-carolina" className="hover:text-gray-900">
-              South Carolina
+            <Link href="/eligibility" className="hover:text-gray-900">
+              Do I qualify?
             </Link>
             <Link href="/programs" className="hover:text-gray-900">
               Programs

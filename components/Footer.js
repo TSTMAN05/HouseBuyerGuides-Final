@@ -20,6 +20,9 @@ export default function Footer() {
           <Link href="/programs" className="hover:text-gray-900">
             All Programs
           </Link>
+          <Link href="/eligibility" className="hover:text-gray-900">
+            Do I qualify?
+          </Link>
           <Link href="/blog" className="hover:text-gray-900">
             Blog
           </Link>
