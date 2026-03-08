@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://housebuyerguides.com
+
+# Sitemaps
+Sitemap: https://housebuyerguides.com/sitemap.xml

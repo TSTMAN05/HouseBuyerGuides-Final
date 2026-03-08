@@ -1,36 +1,39 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# HouseBuyerGuides.com
 
-## Getting Started
+First-time homebuyer program directory by city and state. Next.js (App Router) + Airtable + Vercel.
 
-First, run the development server:
+## Setup
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1. **Copy env**
+   ```bash
+   cp .env.local.example .env.local
+   ```
+   Add your `AIRTABLE_API_KEY` and `AIRTABLE_BASE_ID` from Airtable.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. **Airtable**
+   Create a base with tables: **States**, **Cities**, **Programs** (include a **Slug** field), **Blog Posts**. Use the exact field names from the project schema (see plan or master prompt). Link fields: Cities ↔ State, Cities ↔ Programs, Programs ↔ States as needed.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+3. **Run**
+   ```bash
+   npm install
+   npm run dev
+   ```
+   Open [http://localhost:3000](http://localhost:3000).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Build & deploy
 
-## Learn More
+- `npm run build` — builds the site and runs `next-sitemap` to generate `sitemap.xml` and `robots.txt`.
+- Deploy to Vercel: connect the repo, set `AIRTABLE_BASE_ID` and `AIRTABLE_API_KEY` in project settings. Optional: `NEXT_PUBLIC_SITE_URL` for canonical URLs and sitemap (e.g. `https://housebuyerguides.com`).
 
-To learn more about Next.js, take a look at the following resources:
+## Routes
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `/` — Home (state list)
+- `/[state]` — State overview (e.g. `/north-carolina`)
+- `/[state]/[city]` — City guide (e.g. `/south-carolina/greenville-sc`)
+- `/programs` — Program index
+- `/programs/[slug]` — Program detail
+- `/blog` — Blog index
+- `/blog/[slug]` — Blog post
+- `/about` — About
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Only cities with **Status = Published** get city pages. Programs need a **Slug** to get a program page.
