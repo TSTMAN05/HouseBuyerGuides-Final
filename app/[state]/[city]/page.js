@@ -91,7 +91,7 @@ export default async function CityPage({ params }) {
   const year = new Date().getFullYear();
 
   return (
-    <div className="mx-auto max-w-5xl px-4 sm:px-6">
+    <div className="mx-auto max-w-6xl px-4 sm:px-6">
       <Breadcrumbs
         items={[
           { label: "Home", href: "/" },
@@ -101,12 +101,12 @@ export default async function CityPage({ params }) {
       />
 
       <header className="py-12 md:py-16">
-        <h1 className="text-4xl font-bold tracking-tight text-gray-900 md:text-5xl">
+        <h1 className="text-4xl font-bold tracking-tight text-gray-900 md:text-5xl lg:text-5xl">
           First-Time Homebuyer Programs in{" "}
           <span className="text-blue-600">{cityName}</span>, {stateAbbr} ({year})
         </h1>
         {intro && (
-          <div className="mt-6 max-w-2xl text-gray-700 leading-relaxed">
+          <div className="mt-6 text-gray-700 leading-relaxed">
             {intro}
           </div>
         )}
@@ -141,6 +141,29 @@ export default async function CityPage({ params }) {
           >
             All programs by level
           </h2>
+          <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-600">
+            <div className="flex items-center gap-2">
+              <span
+                className="inline-block h-3 w-3 rounded-sm"
+                style={{ backgroundColor: "#22c55e" }}
+              />
+              <span>Grant / forgivable assistance</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span
+                className="inline-block h-3 w-3 rounded-sm"
+                style={{ backgroundColor: "#f59e0b" }}
+              />
+              <span>Deferred assistance</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span
+                className="inline-block h-3 w-3 rounded-sm"
+                style={{ backgroundColor: "#9ca3af" }}
+              />
+              <span>Repayable / other assistance</span>
+            </div>
+          </div>
           {PROGRAM_LEVEL_ORDER.map((level) => {
             const progs = grouped[level];
             if (!progs?.length) return null;
