@@ -65,6 +65,24 @@ export interface BlogPostRow {
   last_updated: string | null;
 }
 
+export interface RelatedCityLegacy {
+  id: string;
+  "City Name": string;
+  Slug: string;
+  "State Abbreviation": string;
+  "State Slug": string;
+  Population: number | null;
+  "Median Home Price": number | null;
+}
+
+export interface RelatedPostLegacy {
+  id: string;
+  Title: string;
+  Slug: string;
+  Category: string | null;
+  "Meta Description": string | null;
+}
+
 // --- Legacy shapes (Title Case keys for components) ---
 
 export interface StateLegacy {
@@ -411,6 +429,97 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPostLegacy | 
     .maybeSingle();
   if (error || !data) return null;
   return toBlogPost(data as BlogPostRow);
+}
+
+export async function getRelatedCities(
+  stateId: string,
+  currentCityId: string
+): Promise<RelatedCityLegacy[]> {
+  const supabase = getSupabase();
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("cities")
+    .select("id, city_name, slug, population, median_home_price, state_id, states!inner(state_abbreviation, slug)")
+    .eq("status", "Published")
+    .eq("state_id", stateId)
+    .neq("id", currentCityId)
+    .order("population", { ascending: false })
+    .limit(6);
+  if (error || !data?.length) return [];
+
+  return (data as any[]).map((row) => {
+    const state = row.states || {};
+    return {
+      id: row.id,
+      "City Name": row.city_name ?? "",
+      Slug: row.slug ?? "",
+      "State Abbreviation": state.state_abbreviation ?? "",
+      "State Slug": state.slug ?? "",
+      Population: row.population ?? null,
+      "Median Home Price": row.median_home_price ?? null,
+    };
+  });
+}
+
+export async function getRelatedBlogPosts(
+  cityId: string
+): Promise<RelatedPostLegacy[]> {
+  const supabase = getSupabase();
+  if (!supabase) return [];
+
+  const { data: linked, error: linkedError } = await supabase
+    .from("blog_post_cities")
+    .select("blog_post_id, blog_posts!inner(id, title, slug, category, meta_description, status, publish_date)")
+    .eq("city_id", cityId);
+
+  const primary: RelatedPostLegacy[] = [];
+  const seenIds = new Set<string>();
+
+  if (!linkedError && linked?.length) {
+    for (const row of linked as any[]) {
+      const post = row.blog_posts;
+      if (!post || post.status !== "Published") continue;
+      if (seenIds.has(post.id)) continue;
+      seenIds.add(post.id);
+      primary.push({
+        id: post.id,
+        Title: post.title ?? "",
+        Slug: post.slug ?? "",
+        Category: post.category ?? null,
+        "Meta Description": post.meta_description ?? null,
+      });
+    }
+  }
+
+  if (primary.length >= 3) {
+    return primary.slice(0, 3);
+  }
+
+  const remaining = 3 - primary.length;
+
+  const { data: fallback, error: fallbackError } = await supabase
+    .from("blog_posts")
+    .select("id, title, slug, category, meta_description, status, publish_date")
+    .eq("status", "Published")
+    .order("publish_date", { ascending: false })
+    .limit(10);
+
+  if (!fallbackError && fallback?.length) {
+    for (const post of fallback as BlogPostRow[]) {
+      if (seenIds.has(post.id)) continue;
+      seenIds.add(post.id);
+      primary.push({
+        id: post.id,
+        Title: post.title ?? "",
+        Slug: post.slug ?? "",
+        Category: post.category ?? null,
+        "Meta Description": post.meta_description ?? null,
+      });
+      if (primary.length >= 3) break;
+    }
+  }
+
+  return primary.slice(0, 3);
 }
 
 export async function getStateSlugs(): Promise<string[]> {

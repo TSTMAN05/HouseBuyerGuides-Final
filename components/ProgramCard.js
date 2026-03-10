@@ -30,16 +30,18 @@ export default function ProgramCard({ program, variant = "featured", showLink = 
         style={{ borderLeftColor: borderColor }}
       >
         <div className="min-w-0 flex-1">
-          {showLink && slug ? (
-            <Link
-              href={`/programs/${slug}`}
-              className="font-medium text-gray-900 hover:text-blue-600 hover:underline"
-            >
-              {name}
-            </Link>
-          ) : (
-            <span className="font-medium text-gray-900">{name}</span>
-          )}
+          <h3 className="font-medium text-gray-900">
+            {showLink && slug ? (
+              <Link
+                href={`/programs/${slug}`}
+                className="hover:text-blue-600 hover:underline"
+              >
+                {name}
+              </Link>
+            ) : (
+              name
+            )}
+          </h3>
           {org && (
             <p className="text-sm text-gray-600 truncate">{org}</p>
           )}
@@ -77,16 +79,18 @@ export default function ProgramCard({ program, variant = "featured", showLink = 
     <div className="flex h-full flex-col rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md">
       <div className="flex flex-1 flex-col gap-2">
         <div>
-          {showLink && slug ? (
-            <Link
-              href={`/programs/${slug}`}
-              className="font-semibold text-gray-900 hover:text-blue-600 hover:underline"
-            >
-              {name}
-            </Link>
-          ) : (
-            <span className="font-semibold text-gray-900">{name}</span>
-          )}
+          <h3 className="font-semibold text-gray-900 text-lg">
+            {showLink && slug ? (
+              <Link
+                href={`/programs/${slug}`}
+                className="hover:text-blue-600 hover:underline"
+              >
+                {name}
+              </Link>
+            ) : (
+              name
+            )}
+          </h3>
           {org && (
             <p className="text-sm text-gray-600 mt-0.5">{org}</p>
           )}

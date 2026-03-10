@@ -6,6 +6,8 @@ import {
   getCitiesByStateSlug,
   getProgramsByCity,
   getPublishedCityParams,
+  getRelatedCities,
+  getRelatedBlogPosts,
 } from "@/lib/supabase-queries";
 import {
   groupProgramsByLevel,
@@ -23,6 +25,8 @@ import HowToApply from "@/components/HowToApply";
 import FAQSection from "@/components/FAQSection";
 import LastUpdated from "@/components/LastUpdated";
 import CityCard from "@/components/CityCard";
+import RelatedCities from "@/components/RelatedCities";
+import RelatedPosts from "@/components/RelatedPosts";
 
 export const revalidate = 86400;
 
@@ -72,9 +76,11 @@ export default async function CityPage({ params }) {
   const city = await getCityBySlug(stateSlug, citySlug);
   if (!state || !city) notFound();
 
-  const [programs, stateCities] = await Promise.all([
+  const [programs, stateCities, relatedCities, relatedPosts] = await Promise.all([
     getProgramsByCity(city),
     getCitiesByStateSlug(stateSlug),
+    getRelatedCities(state.id, city.id),
+    getRelatedBlogPosts(city.id),
   ]);
   const grouped = groupProgramsByLevel(programs);
   const topPrograms = getTopProgramsByAssistance(programs, 3);
@@ -96,7 +102,7 @@ export default async function CityPage({ params }) {
         items={[
           { label: "Home", href: "/" },
           { label: stateName, href: `/${stateSlug}` },
-          { label: `${cityName} programs` },
+          { label: `${cityName}, ${stateAbbr}` },
         ]}
       />
 
@@ -147,7 +153,14 @@ export default async function CityPage({ params }) {
                 className="inline-block h-3 w-3 rounded-sm"
                 style={{ backgroundColor: "#22c55e" }}
               />
-              <span>Grant / forgivable assistance</span>
+              <span>Grant</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span
+                className="inline-block h-3 w-3 rounded-sm"
+                style={{ backgroundColor: "#3b82f6" }}
+              />
+              <span>Forgivable loan</span>
             </div>
             <div className="flex items-center gap-2">
               <span
@@ -202,6 +215,12 @@ export default async function CityPage({ params }) {
         <HowToApply content={city["How to Apply Content"]} />
 
         <FAQSection faqList={faqList} />
+        <RelatedPosts posts={relatedPosts} />
+        <RelatedCities
+          cities={relatedCities}
+          currentStateName={stateName}
+          currentStateSlug={stateSlug}
+        />
       {faqSchema && (
         <Script
           id="faq-schema"

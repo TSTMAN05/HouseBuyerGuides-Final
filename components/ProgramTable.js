@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PROGRAM_LEVEL_ORDER } from "@/lib/utils";
 
 /**
  * Eligibility quick-reference table: program name, amount, type, income limits, Apply button.
@@ -6,6 +7,24 @@ import Link from "next/link";
  */
 export default function ProgramTable({ programs }) {
   if (!programs?.length) return null;
+
+  // Ensure table order matches City → County → State → Federal → Nonprofit
+  const levelRank = new Map(
+    PROGRAM_LEVEL_ORDER.map((level, index) => [level, index])
+  );
+
+  const orderedPrograms = [...programs].sort((a, b) => {
+    const aLevel = a["Program Level"] || "";
+    const bLevel = b["Program Level"] || "";
+    const aRank =
+      levelRank.has(aLevel) ? levelRank.get(aLevel) : PROGRAM_LEVEL_ORDER.length;
+    const bRank =
+      levelRank.has(bLevel) ? levelRank.get(bLevel) : PROGRAM_LEVEL_ORDER.length;
+    if (aRank !== bRank) return aRank - bRank;
+    const aName = a["Program Name"] || "";
+    const bName = b["Program Name"] || "";
+    return aName.localeCompare(bName);
+  });
   return (
     <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white" style={{ minWidth: 0 }}>
       <table className="min-w-full border-collapse">
@@ -29,7 +48,7 @@ export default function ProgramTable({ programs }) {
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200">
-          {programs.map((p, i) => (
+          {orderedPrograms.map((p, i) => (
             <tr
               key={p.id}
               className={i % 2 === 0 ? "bg-gray-50" : "bg-white"}
