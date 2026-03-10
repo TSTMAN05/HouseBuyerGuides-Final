@@ -5,7 +5,6 @@ import { getBlogPostBySlug, getBlogPosts } from "@/lib/supabase-queries";
 import { buildMetadata } from "@/lib/seo";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import LastUpdated from "@/components/LastUpdated";
-import { withCurrentGuideYear } from "@/lib/utils";
 
 export const revalidate = 86400;
 
@@ -18,7 +17,7 @@ export async function generateMetadata({ params }) {
   const { slug } = await params;
   const post = await getBlogPostBySlug(slug);
   if (!post) return {};
-  const displayTitle = withCurrentGuideYear(post["Meta Title"] || post.Title);
+  const displayTitle = post["Meta Title"] || post.Title;
   const description = post["Meta Description"] || "";
   return buildMetadata({
     title: displayTitle,
@@ -32,8 +31,10 @@ export default async function BlogPostPage({ params }) {
   const post = await getBlogPostBySlug(slug);
   if (!post) notFound();
 
-  const displayTitle = withCurrentGuideYear(post["Meta Title"] || post.Title);
-  const content = post.Content;
+  const displayTitle = post["Meta Title"] || post.Title;
+  const rawContent = post.Content || "";
+  const contentWithoutH1 =
+    rawContent.replace(/^# .+\n+/, "") || "";
   const lastUpdatedDate = post["Last Updated"] || post["Publish Date"];
 
   return (
@@ -48,8 +49,35 @@ export default async function BlogPostPage({ params }) {
       <article>
         <h1 className="text-3xl font-bold text-gray-900">{displayTitle}</h1>
         <LastUpdated date={lastUpdatedDate} />
-        <div className="mt-8 prose prose-gray max-w-none [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-6 [&_ol]:pl-6 [&_p]:mb-4 [&_h2]:mt-8 [&_h2]:text-xl">
-          <ReactMarkdown>{content || ""}</ReactMarkdown>
+        <div className="mt-8 prose prose-lg max-w-none prose-a:text-blue-600 prose-a:underline hover:prose-a:text-blue-800">
+          <ReactMarkdown
+            components={{
+              a: ({ href, children }) => {
+                if (href && href.startsWith("/")) {
+                  return (
+                    <Link
+                      href={href}
+                      className="text-blue-600 underline hover:text-blue-800"
+                    >
+                      {children}
+                    </Link>
+                  );
+                }
+                return (
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline hover:text-blue-800"
+                  >
+                    {children}
+                  </a>
+                );
+              },
+            }}
+          >
+            {contentWithoutH1}
+          </ReactMarkdown>
         </div>
       </article>
       <Link href="/blog" className="mt-10 inline-block text-sm text-blue-600 hover:underline">
